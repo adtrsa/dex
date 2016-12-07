@@ -146,6 +146,52 @@ func (u *UsersAPI) DisableUser(creds Creds, userID string, disable bool) (schema
 	}, nil
 }
 
+func (u *UsersAPI) DeleteUser(creds Creds, userID string) (schema.UserDeleteResponse, error) {
+	log.Infof("userAPI: DeleteUser")
+	if !u.Authorize(creds) {
+		return schema.UserDeleteResponse{}, ErrorUnauthorized
+	}
+
+	if err := u.userManager.Delete(userID); err != nil {
+		return schema.UserDeleteResponse{}, mapError(err)
+	}
+
+	return schema.UserDeleteResponse{
+		Ok: true,
+	}, nil
+}
+
+func (u *UsersAPI) SetMetadata(creds Creds, userID string, metadata string) (schema.UserSetMetadataResponse, error) {
+	log.Infof("userAPI: SetMetadata")
+	if !u.Authorize(creds) {
+		return schema.UserSetMetadataResponse{}, ErrorUnauthorized
+	}
+
+	if err := u.userManager.SetMetadata(userID, metadata); err != nil {
+		return schema.UserSetMetadataResponse{}, mapError(err)
+	}
+
+	return schema.UserSetMetadataResponse{
+		Ok: true,
+	}, nil
+}
+
+func (u *UsersAPI) GetMetadata(creds Creds, userID string) (schema.UserGetMetadataResponse, error) {
+	log.Infof("userAPI: GetMetadata")
+	var resp schema.UserGetMetadataResponse = schema.UserGetMetadataResponse{}
+	var err error
+
+	if !u.Authorize(creds) {
+		return resp, ErrorUnauthorized
+	}
+
+	if resp.Metadata, err = u.userManager.GetMetadata(userID); err != nil {
+		return resp, mapError(err)
+	}
+
+	return resp, nil
+}
+
 // validRedirectURL finds the first client for which the redirect URL is valid. If found it returns the client_id of the client.
 func validRedirectURL(clientManager *clientmanager.ClientManager, redirectURL url.URL, clientIDs []string) (string, error) {
 	// Find the first client with a valid redirectURL.

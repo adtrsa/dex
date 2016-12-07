@@ -125,6 +125,96 @@ func (r *userRepo) Disable(tx repo.Transaction, userID string, disable bool) err
 	return nil
 }
 
+func (r *userRepo) Delete(tx repo.Transaction, userID string) error {
+	if userID == "" {
+		return user.ErrorInvalidID
+	}
+
+	qt := r.quote(userTableName)
+	ex := r.executor(tx)
+
+	result, err := ex.Exec(fmt.Sprintf("DELETE FROM %s WHERE id = $1;", qt), userID)
+	if err != nil {
+		return err
+	}
+
+	ct, err := result.RowsAffected()
+	switch {
+	case err != nil:
+		return err
+	case ct == 0:
+		return user.ErrorNotFound
+	}
+
+	//TODO(adtrsa) Perhaps not the best place to do this, but don't want to introduce coupling with other (non-user) repos.
+	qt = r.quote(remoteIdentityMappingTableName)
+	ex = r.executor(tx)
+
+	result, err = ex.Exec(fmt.Sprintf("DELETE FROM %s WHERE user_id = $1;", qt), userID)
+	if err != nil {
+		return err
+	}
+
+	ct, err = result.RowsAffected()
+	switch {
+	case err != nil:
+		return err
+	case ct == 0:
+		return user.ErrorNotFound
+	}
+
+	qt = r.quote(passwordInfoTableName)
+	ex = r.executor(tx)
+
+	result, err = ex.Exec(fmt.Sprintf("DELETE FROM %s WHERE user_id = $1;", qt), userID)
+	if err != nil {
+		return err
+	}
+
+	ct, err = result.RowsAffected()
+	switch {
+	case err != nil:
+		return err
+	case ct == 0:
+		return user.ErrorNotFound
+	}
+
+	return nil
+}
+
+func (r *userRepo) SetMetadata(tx repo.Transaction, userID string, metadata string) error {
+	if userID == "" {
+		return user.ErrorInvalidID
+	}
+
+	user, err := r.get(tx, userID)
+	if err != nil {
+		return err
+	}
+
+	user.Metadata = metadata
+
+	r.update(tx, user)
+
+	if err != nil {
+		log.Errorf("SetMetadata request failed for userID: %v", userID)
+	}
+
+	return err
+}
+
+func (r *userRepo) GetMetadata(tx repo.Transaction, userID string) (string, error) {
+	if userID == "" {
+		return "", user.ErrorInvalidID
+	}
+
+	qt := r.quote(userTableName)
+	ex := r.executor(tx)
+
+	metadata, err := ex.SelectStr(fmt.Sprintf("SELECT metadata FROM %s WHERE id = $1;", qt), userID)
+	return metadata, err
+}
+
 func (r *userRepo) GetByEmail(tx repo.Transaction, email string) (user.User, error) {
 	return r.getByEmail(tx, email)
 }
@@ -423,6 +513,7 @@ func (r *userRepo) insertRemoteIdentity(tx repo.Transaction, userID string, ri u
 	return err
 }
 
+//NOTE: This has to match fields in authd_user table and schema User definition.
 type userModel struct {
 	ID            string `db:"id"`
 	Email         string `db:"email"`
@@ -431,6 +522,7 @@ type userModel struct {
 	Disabled      bool   `db:"disabled"`
 	Admin         bool   `db:"admin"`
 	CreatedAt     int64  `db:"created_at"`
+	Metadata      string `db:"metadata"`
 }
 
 func (u *userModel) user() (user.User, error) {
@@ -441,6 +533,7 @@ func (u *userModel) user() (user.User, error) {
 		EmailVerified: u.EmailVerified,
 		Admin:         u.Admin,
 		Disabled:      u.Disabled,
+		Metadata:      u.Metadata,
 	}
 
 	if u.CreatedAt != 0 {
@@ -464,6 +557,7 @@ func newUserModel(u *user.User) (*userModel, error) {
 		EmailVerified: u.EmailVerified,
 		Admin:         u.Admin,
 		Disabled:      u.Disabled,
+		Metadata:      u.Metadata,
 	}
 
 	if !u.CreatedAt.IsZero() {

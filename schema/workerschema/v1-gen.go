@@ -121,6 +121,8 @@ type User struct {
 	EmailVerified bool `json:"emailVerified,omitempty"`
 
 	Id string `json:"id,omitempty"`
+
+	Metadata string `json:"metadata,omitempty"`
 }
 
 type UserCreateRequest struct {
@@ -140,6 +142,10 @@ type UserCreateResponse struct {
 type UserCreateResponseUser struct {
 }
 
+type UserDeleteResponse struct {
+	Ok bool `json:"ok,omitempty"`
+}
+
 type UserDisableRequest struct {
 	// Disable: If true, disable this user, if false, enable them. No error
 	// is signaled if the user state doesn't change.
@@ -150,8 +156,20 @@ type UserDisableResponse struct {
 	Ok bool `json:"ok,omitempty"`
 }
 
+type UserGetMetadataResponse struct {
+	Metadata string `json:"metadata,omitempty"`
+}
+
 type UserResponse struct {
 	User *User `json:"user,omitempty"`
+}
+
+type UserSetMetadataRequest struct {
+	Metadata string `json:"metadata,omitempty"`
+}
+
+type UserSetMetadataResponse struct {
+	Ok bool `json:"ok,omitempty"`
 }
 
 type UsersResponse struct {

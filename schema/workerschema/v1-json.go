@@ -96,6 +96,9 @@ const DiscoveryJSON = `{
         "createdAt": {
           "type": "string",
           "format": "date-time"
+        },
+        "metadata": {
+          "type": "string"
         }
       }
     },
@@ -168,6 +171,42 @@ const DiscoveryJSON = `{
       "properties": {
         "ok": {
           "type": "boolean"
+        }
+      }
+    },
+    "UserDeleteResponse": {
+      "id": "UserDeleteResponse",
+      "type": "object",
+      "properties": {
+        "ok": {
+          "type": "boolean"
+        }
+      }
+    },
+    "UserSetMetadataRequest": {
+      "id": "UserSetMetadataRequest",
+      "type": "object",
+      "properties": {
+        "metadata": {
+          "type": "string"
+        }
+      }
+    },
+    "UserSetMetadataResponse": {
+      "id": "UserSetMetadataResponse",
+      "type": "object",
+      "properties": {
+        "ok": {
+          "type": "boolean"
+        }
+      }
+    },
+    "UserGetMetadataResponse": {
+      "id": "UserGetMetadataResponse",
+      "type": "object",
+      "properties": {
+        "metadata": {
+          "type": "string"
         }
       }
     },

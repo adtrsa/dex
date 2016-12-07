@@ -29,6 +29,7 @@ var (
 	UsersGetEndpoint              = addBasePath(UsersSubTree + "/:id")
 	UsersDisableEndpoint          = addBasePath(UsersSubTree + "/:id/disable")
 	UsersResendInvitationEndpoint = addBasePath(UsersSubTree + "/:id/resend-invitation")
+	UsersMetadataEndpoint         = addBasePath(UsersSubTree + "/:id/metadata")
 	AccountSubTree                = "/account"
 	AccountListRefreshTokens      = addBasePath(AccountSubTree + "/:userid/refresh")
 	AccountRevokeRefreshToken     = addBasePath(AccountSubTree + "/:userid/refresh/:clientid")
@@ -61,8 +62,10 @@ func (s *UserMgmtServer) HTTPHandler() http.Handler {
 	r.POST(UsersCreateEndpoint, s.authAdminUser(s.createUser))
 	r.POST(UsersDisableEndpoint, s.authAdminUser(s.disableUser))
 	r.GET(UsersGetEndpoint, s.authAdminUser(s.getUser))
+	r.DELETE(UsersGetEndpoint, s.authAdminUser(s.deleteUser))
 	r.POST(UsersResendInvitationEndpoint, s.authAdminUser(s.resendInvitationEmail))
-
+	r.POST(UsersMetadataEndpoint, s.authAdminUser(s.setUserMetadata))
+	r.GET(UsersMetadataEndpoint, s.authAdminUser(s.getUserMetadata))
 	r.GET(AccountListRefreshTokens, s.authAccount(s.listClientsWithRefreshTokens))
 	r.DELETE(AccountRevokeRefreshToken, s.authAccount(s.revokeRefreshTokensForClient))
 	return r
@@ -189,6 +192,23 @@ func (s *UserMgmtServer) disableUser(w http.ResponseWriter, r *http.Request, ps 
 	writeResponseWithBody(w, http.StatusOK, resp)
 }
 
+func (s *UserMgmtServer) deleteUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params, creds api.Creds) {
+	id := ps.ByName("id")
+	if id == "" {
+		writeAPIError(w, http.StatusBadRequest,
+			newAPIError(errorInvalidRequest, "id is required"))
+		return
+	}
+
+	resp, err := s.api.DeleteUser(creds, id)
+	if err != nil {
+		s.writeError(w, err)
+		return
+	}
+
+	writeResponseWithBody(w, http.StatusOK, resp)
+}
+
 func (s *UserMgmtServer) resendInvitationEmail(w http.ResponseWriter, r *http.Request, ps httprouter.Params, creds api.Creds) {
 	id := ps.ByName("id")
 	if id == "" {
@@ -215,6 +235,46 @@ func (s *UserMgmtServer) resendInvitationEmail(w http.ResponseWriter, r *http.Re
 	}
 
 	writeResponseWithBody(w, http.StatusOK, resendEmailInvitationResponse)
+}
+
+func (s *UserMgmtServer) setUserMetadata(w http.ResponseWriter, r *http.Request, ps httprouter.Params, creds api.Creds) {
+	id := ps.ByName("id")
+
+	if id == "" {
+		writeAPIError(w, http.StatusBadRequest, newAPIError(errorInvalidRequest, "id is required"))
+		return
+	}
+
+	setMetaReq := schema.UserSetMetadataRequest{}
+	if err := json.NewDecoder(r.Body).Decode(&setMetaReq); err != nil {
+		writeInvalidRequest(w, "cannot parse JSON body")
+		return
+	}
+
+	setMetaResp, err := s.api.SetMetadata(creds, id, setMetaReq.Metadata)
+	if err != nil {
+		s.writeError(w, err)
+		return
+	}
+
+	writeResponseWithBody(w, http.StatusOK, setMetaResp)
+}
+
+func (s *UserMgmtServer) getUserMetadata(w http.ResponseWriter, r *http.Request, ps httprouter.Params, creds api.Creds) {
+	id := ps.ByName("id")
+	if id == "" {
+		writeAPIError(w, http.StatusBadRequest,
+			newAPIError(errorInvalidRequest, "id is required"))
+		return
+	}
+
+	getMetaResponse, err := s.api.GetMetadata(creds, id)
+	if err != nil {
+		s.writeError(w, err)
+		return
+	}
+
+	writeResponseWithBody(w, http.StatusOK, getMetaResponse)
 }
 
 func (s *UserMgmtServer) listClientsWithRefreshTokens(w http.ResponseWriter, r *http.Request, ps httprouter.Params, creds api.Creds) {

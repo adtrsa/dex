@@ -85,6 +85,8 @@ type User struct {
 	Disabled bool
 
 	CreatedAt time.Time
+
+	Metadata string
 }
 
 type UserFilter struct {
@@ -123,6 +125,12 @@ type UserRepo interface {
 	GetByEmail(tx repo.Transaction, email string) (User, error)
 
 	Disable(tx repo.Transaction, id string, disabled bool) error
+
+	Delete(tx repo.Transaction, id string) error
+
+	SetMetadata(tx repo.Transaction, id string, metadata string) error
+
+	GetMetadata(tx repo.Transaction, id string) (string, error)
 
 	Update(repo.Transaction, User) error
 

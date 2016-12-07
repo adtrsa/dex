@@ -120,6 +120,46 @@ func (m *UserManager) Disable(userID string, disabled bool) error {
 	return nil
 }
 
+func (m *UserManager) Delete(userID string) error {
+	tx, err := m.begin()
+
+	if err = m.userRepo.Delete(tx, userID); err != nil {
+		rollback(tx)
+		return err
+	}
+
+	if err = tx.Commit(); err != nil {
+		rollback(tx)
+		return err
+	}
+
+	return nil
+}
+
+func (m *UserManager) SetMetadata(userID string, metadata string) error {
+	tx, err := m.begin()
+
+	if err = m.userRepo.SetMetadata(tx, userID, metadata); err != nil {
+		rollback(tx)
+		return err
+	}
+
+	if err = tx.Commit(); err != nil {
+		rollback(tx)
+		return err
+	}
+
+	return nil
+}
+
+func (m *UserManager) GetMetadata(userID string) (string, error) {
+	metadata, err := m.userRepo.GetMetadata(nil, userID)
+	if err != nil {
+		metadata = ""
+	}
+	return metadata, err
+}
+
 func (m *UserManager) SetDisplayName(usr user.User, displayName string) error {
 	tx, err := m.begin()
 	if err != nil {

@@ -96,5 +96,11 @@ var PostgresMigrations migrate.MigrationSource = &migrate.MemoryMigrationSource{
 				"-- +migrate Up\nALTER TABLE refresh_token ADD COLUMN \"connector_id\" text;\nALTER TABLE session ADD COLUMN \"groups\" text;\n",
 			},
 		},
+		{
+			Id: "0015_add_user_metadata.sql",
+			Up: []string{
+				"-- +migrate Up\nALTER TABLE authd_user ADD COLUMN \"metadata\" text;\n",
+			},
+		},
 	},
 }
