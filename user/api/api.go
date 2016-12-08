@@ -376,6 +376,7 @@ func userToSchemaUser(usr user.User) schema.User {
 		Admin:         usr.Admin,
 		Disabled:      usr.Disabled,
 		CreatedAt:     usr.CreatedAt.UTC().Format(time.RFC3339),
+		Metadata:      usr.Metadata,
 	}
 }
 
@@ -387,6 +388,7 @@ func schemaUserToUser(usr schema.User) user.User {
 		DisplayName:   usr.DisplayName,
 		Admin:         usr.Admin,
 		Disabled:      usr.Disabled,
+		Metadata:      usr.Metadata,
 	}
 }
 
