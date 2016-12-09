@@ -103,6 +103,19 @@ func (u *User) AddToClaims(claims jose.Claims) {
 			claims.Add("email_verified", true)
 		}
 	}
+
+	// Adds user metadata to claims if it is non-empty.
+	if u.Metadata != "" {
+		var tmpclaims jose.Claims
+		err := json.Unmarshal([]byte(u.Metadata), &tmpclaims)
+
+		if err == nil {
+			for k, v := range tmpclaims {
+				claims.Add(k, v)
+			}
+		}
+		// TODO(adtrsa) Report error
+	}
 }
 
 // UserRepo implementations maintain a persistent set of users.
