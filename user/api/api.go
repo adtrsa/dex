@@ -219,9 +219,16 @@ func (u *UsersAPI) CreateUser(creds Creds, usr schema.User, redirURL url.URL) (s
 		return schema.UserCreateResponse{}, mapError(err)
 	}
 
-	clientID, err := validRedirectURL(u.clientManager, redirURL, creds.ClientIDs)
-	if err != nil {
-		return schema.UserCreateResponse{}, err
+	// Only check redirURL if scheme not empty (to allow for skipping specification of redirect URL)
+	var clientID string
+
+	if redirURL.Scheme != "" {
+		cid, err := validRedirectURL(u.clientManager, redirURL, creds.ClientIDs)
+		if err != nil {
+			return schema.UserCreateResponse{}, err
+		}
+		clientID = cid
+
 	}
 
 	id, err := u.userManager.CreateUser(schemaUserToUser(usr), user.Password(hash), u.localConnectorID)
