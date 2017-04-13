@@ -1,8 +1,10 @@
-hash: 5007c2ed2a8d71321949be6b1a525bdb7b827e7b7a5db711a308ade97e79a942
-updated: 2016-11-23T19:49:41.488352648+03:00
+hash: 15cd0b331fdce10869f538f3aed5c36c4d04ec51ec3551c1d7c5e3ce6e4e6cc0
+updated: 2017-04-07T12:44:44.836678058+02:00
 imports:
 - name: github.com/andybalholm/cascadia
   version: 6122e68c2642b7b75c538a63b15168c6c80fb757
+- name: github.com/beevik/etree
+  version: 4cd0dd976db869f817248477718071a28e978df0
 - name: github.com/coreos/go-oidc
   version: d3e23e1446a65c7de3d36ed8b6dda1eb224c9194
   subpackages:
@@ -25,7 +27,7 @@ imports:
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/jonboulle/clockwork
-  version: 3f831b65b61282ba6bece21b91beea2edc4c887a
+  version: bcac9884e7502bb2b474c0339d889cb981a2f27f
 - name: github.com/julienschmidt/httprouter
   version: 8c199fb6259ffc1af525cc3ad52ee60ba8359669
 - name: github.com/kylelemons/godebug
@@ -49,6 +51,13 @@ imports:
   version: 53184e1edfb4f9655b0fa8dd2c23e7763f452bda
   subpackages:
   - sqlparse
+- name: github.com/russellhaering/goxmldsig
+  version: eaac44c63fe007124f8f6255b09febc906784981
+  subpackages:
+  - etreeutils
+  - types
+- name: github.com/Sirupsen/logrus
+  version: d26492970760ca5d33129d2d799e34be5c4782eb
 - name: github.com/spf13/cobra
   version: b3f29e98e63a3618988a231fd02b45c1e6369d4f
 - name: github.com/spf13/pflag
@@ -61,9 +70,13 @@ imports:
 - name: golang.org/x/net
   version: dfe268fd2bb5c793f4c083803609fce9806c6f80
   subpackages:
-  - context
   - html
+  - context
   - html/atom
+- name: golang.org/x/sys
+  version: f3918c30c5c2cb527c0b071a27c35120a6c0719a
+  subpackages:
+  - unix
 - name: google.golang.org/api
   version: d3edb0282bde692467788c50070a9211afe75cf3
   subpackages:

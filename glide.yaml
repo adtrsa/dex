@@ -25,8 +25,6 @@ import:
   version: 60c7bfde3e33c201519a200a4507a158cc03a17b
 - package: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
-- package: github.com/jonboulle/clockwork
-  version: 3f831b65b61282ba6bece21b91beea2edc4c887a
 - package: github.com/julienschmidt/httprouter
   version: 8c199fb6259ffc1af525cc3ad52ee60ba8359669
 - package: github.com/kylelemons/godebug
@@ -73,3 +71,11 @@ import:
   version: c87af80f3cc5036b55b83d77171e156791085e2e
 - package: gopkg.in/ldap.v2
   version: e9a325d64989e2844be629682cb085d2c58eef8d
+- package: github.com/Sirupsen/logrus
+  version: v0.11.0
+- package: github.com/russellhaering/goxmldsig
+  version: eaac44c63fe007124f8f6255b09febc906784981
+- package: github.com/beevik/etree
+  version: 4cd0dd976db869f817248477718071a28e978df0
+- package: github.com/jonboulle/clockwork
+  version: bcac9884e7502bb2b474c0339d889cb981a2f27f

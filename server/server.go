@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"net/http"
 	"net/url"
+	"os"
 	"path"
 	"sort"
 	"strings"
@@ -19,10 +20,10 @@ import (
 	"github.com/go-gorp/gorp"
 	"github.com/jonboulle/clockwork"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/coreos/dex/client"
 	clientmanager "github.com/coreos/dex/client/manager"
 	"github.com/coreos/dex/connector"
-	"github.com/coreos/dex/pkg/log"
 	"github.com/coreos/dex/refresh"
 	"github.com/coreos/dex/scope"
 	"github.com/coreos/dex/session"
@@ -42,6 +43,13 @@ const (
 	OOBTemplateName                    = "oob-template.html"
 	APIVersion                         = "v1"
 )
+
+func init() {
+	// Output to stdout instead of the default stderr
+	// Can be any io.Writer, see below for File example
+	log.SetOutput(os.Stdout)
+	log.SetLevel(log.DebugLevel)
+}
 
 type OIDCServer interface {
 	Client(string) (client.Client, error)
