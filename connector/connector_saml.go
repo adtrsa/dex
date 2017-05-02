@@ -82,11 +82,24 @@ func (c *SAMLConnector) TrustedEmailProvider() bool {
 	return false
 }
 
-func (c *SAMLConnector) Identity(email string) (*oidc.Identity, error) {
-	//TODO: [adtrsa] Erm.... is this a fair assumption?
-	//The remote identity format will depend on what's beyond the SAML
-	//connection (LDAP etc.).
-	id := &oidc.Identity{Email: email, ID: email}
+//Obtain oidc.Identity from SAML response email and uid fields.
+func (c *SAMLConnector) Identity(uid, email string) (*oidc.Identity, error) {
+	////TODO: (adtrsa) Test assumption.
+	//
+	// This assumes SAMLResponse contained at least the following AttributeStatement:
+	//<saml2:AttributeStatement>
+	// 	<saml2:Attribute
+	//                       FriendlyName="uid" Name="urn:oid:0.9.2342.19200300.100.1.1"
+	//                       NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+	// 	    <saml2:AttributeValue>EXAMPLE_USER_ID</saml2:AttributeValue>
+	// 	</saml2:Attribute>
+	// 	<saml2:Attribute
+	//                       FriendlyName="mail" Name="urn:oid:0.9.2342.19200300.100.1.3"
+	//                       NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
+	// 	<saml2:AttributeValue>EXAMPLE_EMAIL@DOMAIN</saml2:AttributeValue>
+	// 	</saml2:Attribute>
+	//</saml2:AttributeStatement>
+	id := &oidc.Identity{Email: email, ID: uid}
 	return id, nil
 }
 
@@ -113,7 +126,7 @@ func (c *SAMLConnector) handleLogin(lf oidc.LoginFunc,
 			return
 		}
 
-		// TODO(adtrsa) May need to add other things to RelayState apart from session key to auth
+		// TODO: (adtrsa) May need to add other things to RelayState apart from session key to auth
 		// TODO(ericchiang): Don't inline this.
 		fmt.Fprintf(w, `<!DOCTYPE html>
 			  <html lang="en">
@@ -172,6 +185,8 @@ func (c *SAMLConnector) handleLogin(lf oidc.LoginFunc,
 			return
 		}
 
+		log.WithFields(log.Fields{"samplResponse": samlResponse}).Debug("SAML response")
+
 		var s v2saml.Scopes
 		ident2, err := c.v2connector.HandlePOST(s, samlResponse,
 			sessionKey)
@@ -181,7 +196,11 @@ func (c *SAMLConnector) handleLogin(lf oidc.LoginFunc,
 			return
 		}
 
-		ident, err := c.Identity(ident2.Email)
+		//NOTE: v2 SAML UserID maps to saml2:NameID which could be transient.
+		//      So use the username instead.
+		//      This (possibly incorrectly) assumes SAML response will
+		//      contain uid and email fields.
+		ident, err := c.Identity(ident2.Username, ident2.Email)
 
 		if err != nil {
 			log.WithFields(
