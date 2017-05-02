@@ -291,7 +291,7 @@ func handleResendFunc(c *oidc.Client, issuerURL, resendURL, cbURL url.URL) http.
 		qBytes, err := json.Marshal(&q)
 		res, err := hc.Post(resendURL.String(), "application/json", bytes.NewReader(qBytes))
 		if err != nil {
-			log.Fatalf("error requesting email resend:", err)
+			log.Fatalf("error requesting email resend: %s", err)
 		}
 
 		w.Write([]byte(fmt.Sprintf("Status from Dex: %v", res.Status)))
@@ -352,7 +352,7 @@ pre {
  white-space: -pre-wrap;      /* Opera 4-6 */
  white-space: -o-pre-wrap;    /* Opera 7 */
  word-wrap: break-word;       /* Internet Explorer 5.5+ */
-} 
+}
     </style>
   </head>
   <body>
