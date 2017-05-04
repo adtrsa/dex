@@ -89,17 +89,26 @@ func (c *SAMLConnector) Identity(uid, email string) (*oidc.Identity, error) {
 	// This assumes SAMLResponse contained at least the following AttributeStatement:
 	//<saml2:AttributeStatement>
 	// 	<saml2:Attribute
-	//                       FriendlyName="uid" Name="urn:oid:0.9.2342.19200300.100.1.1"
+	//                       FriendlyName="uid"
+	//                       Name="urn:oid:0.9.2342.19200300.100.1.1"
 	//                       NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
 	// 	    <saml2:AttributeValue>EXAMPLE_USER_ID</saml2:AttributeValue>
 	// 	</saml2:Attribute>
 	// 	<saml2:Attribute
-	//                       FriendlyName="mail" Name="urn:oid:0.9.2342.19200300.100.1.3"
+	//                       FriendlyName="mail"
+	//                       Name="urn:oid:0.9.2342.19200300.100.1.3"
 	//                       NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
 	// 	<saml2:AttributeValue>EXAMPLE_EMAIL@DOMAIN</saml2:AttributeValue>
 	// 	</saml2:Attribute>
-	//</saml2:AttributeStatement>
-	id := &oidc.Identity{Email: email, ID: uid}
+	//
+	// Set displayname to uid since that's all we got.
+	// TODO:  <saml:Attribute
+	// NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"
+	// Name="urn:oid:2.5.4.42"
+	// FriendlyName="givenName">
+	// </saml:Attribute>
+
+	id := &oidc.Identity{Email: email, ID: uid, Name: uid}
 	return id, nil
 }
 
@@ -191,6 +200,8 @@ func (c *SAMLConnector) handleLogin(lf oidc.LoginFunc,
 		ident2, err := c.v2connector.HandlePOST(s, samlResponse,
 			sessionKey)
 
+		log.Debugf("ident2: %+v", ident2)
+
 		if err != nil {
 			log.WithFields(log.Fields{"err": err}).Error("SAMLConnector.handlePOST Unable to handle response.")
 			return
@@ -210,6 +221,8 @@ func (c *SAMLConnector) handleLogin(lf oidc.LoginFunc,
 				}).Error("SAMLConnector.handlePOST Identity retrieval failure.")
 			return
 		}
+
+		log.Debugf("ident: %+v", ident)
 
 		redirectURL, err := lf(*ident, sessionKey)
 

@@ -27,3 +27,6 @@ bin/
 coverage/
 deploy/
 gopath/
+
+# Vendor folders should not be checked in.
+vendor/
