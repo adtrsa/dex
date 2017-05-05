@@ -13,20 +13,20 @@ const DiscoveryJSON = `{
   "version": "v1",
   "title": "Dex API",
   "description": "The Dex REST API",
-  "documentationLink": "http://github.com/coreos/dex",
+  "documentationLink": "http:\/\/github.com\/coreos\/dex",
   "protocol": "rest",
   "icons": {
     "x16": "",
     "x32": ""
   },
   "labels": [],
-  "baseUrl": "$ENDPOINT/api/v1/",
-  "basePath": "/api/v1/",
-  "rootUrl": "$ENDPOINT/",
-  "servicePath": "api/v1/",
+  "baseUrl": "$ENDPOINT\/api\/v1\/",
+  "basePath": "\/api\/v1\/",
+  "rootUrl": "$ENDPOINT\/",
+  "servicePath": "api\/v1\/",
   "batchPath": "batch",
-  "parameters": {},
-  "auth": {},
+  "parameters": null,
+  "auth": null,
   "schemas": {
     "Error": {
       "id": "Error",
@@ -231,6 +231,84 @@ const DiscoveryJSON = `{
           "type": "boolean"
         }
       }
+    },
+    "RemoteIdentityDeleteResponse": {
+      "id": "RemoteIdentityDeleteResponse",
+      "type": "object",
+      "properties": {
+        "ok": {
+          "type": "boolean"
+        }
+      }
+    },
+    "AddRemoteIdentityRequest": {
+      "id": "AddRemoteIdentityRequest",
+      "type": "object",
+      "properties": {
+        "identity": {
+          "$ref": "RemoteIdentity"
+        }
+      }
+    },
+    "AddRemoteIdentityResponse": {
+      "id": "AddRemoteIdentityResponse",
+      "type": "object",
+      "properties": {
+        "identity": {
+          "$ref": "RemoteIdentity"
+        }
+      }
+    },
+    "ListRemoteIdentityResponse": {
+      "id": "ListRemoteIdentityResponse",
+      "type": "object",
+      "properties": {
+        "identities": {
+          "type": "array",
+          "items": {
+            "$ref": "RemoteIdentity"
+          }
+        }
+      }
+    },
+    "GetRemoteIdentityResponse": {
+      "id": "GetRemoteIdentityResponse",
+      "type": "object",
+      "properties": {
+        "identity": {
+          "$ref": "RemoteIdentity"
+        }
+      }
+    },
+    "DeleteRemoteIdentityRequest": {
+      "id": "DeleteRemoteIdentityRequest",
+      "type": "object",
+      "properties": {
+        "identity": {
+          "$ref": "RemoteIdentity"
+        }
+      }
+    },
+    "DeleteRemoteIdentityResponse": {
+      "id": "DeleteRemoteIdentityResponse",
+      "type": "object",
+      "properties": {
+        "identity": {
+          "$ref": "RemoteIdentity"
+        }
+      }
+    },
+    "RemoteIdentity": {
+      "id": "RemoteIdentity",
+      "type": "object",
+      "properties": {
+        "connectorID": {
+          "type": "string"
+        },
+        "remoteID": {
+          "type": "string"
+        }
+      }
     }
   },
   "resources": {
@@ -259,7 +337,7 @@ const DiscoveryJSON = `{
           "id": "dex.User.Get",
           "description": "Get a single User object by id.",
           "httpMethod": "GET",
-          "path": "users/{id}",
+          "path": "users\/{id}",
           "parameters": {
             "id": {
               "type": "string",
@@ -290,7 +368,7 @@ const DiscoveryJSON = `{
           "id": "dex.User.Disable",
           "description": "Enable or disable a user.",
           "httpMethod": "POST",
-          "path": "users/{id}/disable",
+          "path": "users\/{id}\/disable",
           "parameters": {
             "id": {
               "type": "string",
@@ -312,7 +390,7 @@ const DiscoveryJSON = `{
           "id": "dex.User.ResendEmailInvitation",
           "description": "Resend invitation email to an existing user with unverified email.",
           "httpMethod": "POST",
-          "path": "users/{id}/resend-invitation",
+          "path": "users\/{id}\/resend-invitation",
           "parameters": {
             "id": {
               "type": "string",
@@ -329,6 +407,94 @@ const DiscoveryJSON = `{
           "response": {
             "$ref": "ResendEmailInvitationResponse"
           }
+        },
+        "AddRemoteIdentity": {
+          "id": "dex.User.AddRemoteIdentity",
+          "description": "Add a remote identity for a user.",
+          "httpMethod": "POST",
+          "path": "users\/{id}\/remote-identity",
+          "parameters": {
+            "id": {
+              "type": "string",
+              "required": true,
+              "location": "path"
+            }
+          },
+          "parameterOrder": [
+            "id"
+          ],
+          "request": {
+            "$ref": "AddRemoteIdentityRequest"
+          },
+          "response": {
+            "$ref": "AddRemoteIdentityResponse"
+          }
+        },
+        "ListRemoteIdentity": {
+          "id": "dex.User.ListRemoteIdentity",
+          "description": "Retrieve a page of RemoteIdentity objects.",
+          "httpMethod": "GET",
+          "path": "users\/{id}\/remote-identity",
+          "parameters": {
+            "id": {
+              "type": "string",
+              "required": true,
+              "location": "path"
+            }
+          },
+          "parameterOrder": [
+            "id"
+          ],
+          "response": {
+            "$ref": "ListRemoteIdentityResponse"
+          }
+        },
+        "GetRemoteIdentity": {
+          "id": "dex.User.GetRemoteIdentity",
+          "description": "Get a single RemoteIdentity object by user and remote ids.",
+          "httpMethod": "GET",
+          "path": "users\/{id}\/remote-identity\/{connectorid}",
+          "parameters": {
+            "id": {
+              "type": "string",
+              "required": true,
+              "location": "path"
+            },
+            "connectorid": {
+              "type": "string",
+              "required": true,
+              "location": "path"
+            }
+          },
+          "parameterOrder": [
+            "id",
+            "connectorid"
+          ],
+          "response": {
+            "$ref": "GetRemoteIdentityResponse"
+          }
+        },
+        "DeleteRemoteIdentity": {
+          "id": "dex.User.DeleteRemoteIdentity",
+          "description": "Delete a single RemoteIdentity object by user and supplied remote identity object.",
+          "httpMethod": "DELETE",
+          "path": "users\/{id}\/remote-identity",
+          "parameters": {
+            "id": {
+              "type": "string",
+              "required": true,
+              "location": "path"
+            }
+          },
+          "parameterOrder": [
+            "id"
+          ],
+          "request": {
+            "$ref": "DeleteRemoteIdentityRequest"
+          },
+          "response": {
+            "$ref": "DeleteRemoteIdentityResponse"
+          }
         }
       }
     },
@@ -338,7 +504,7 @@ const DiscoveryJSON = `{
           "id": "dex.RefreshClient.List",
           "description": "List all clients that hold refresh tokens for the specified user.",
           "httpMethod": "GET",
-          "path": "account/{userid}/refresh",
+          "path": "account\/{userid}\/refresh",
           "parameters": {
             "userid": {
               "type": "string",
@@ -357,7 +523,7 @@ const DiscoveryJSON = `{
           "id": "dex.RefreshClient.Revoke",
           "description": "Revoke all refresh tokens issues to the client for the specified user.",
           "httpMethod": "DELETE",
-          "path": "account/{userid}/refresh/{clientid}",
+          "path": "account\/{userid}\/refresh\/{clientid}",
           "parameterOrder": [
             "userid",
             "clientid"

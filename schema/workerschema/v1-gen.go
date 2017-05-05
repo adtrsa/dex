@@ -77,10 +77,34 @@ type UsersService struct {
 	s *Service
 }
 
+type AddRemoteIdentityRequest struct {
+	Identity *RemoteIdentity `json:"identity,omitempty"`
+}
+
+type AddRemoteIdentityResponse struct {
+	Identity *RemoteIdentity `json:"identity,omitempty"`
+}
+
+type DeleteRemoteIdentityRequest struct {
+	Identity *RemoteIdentity `json:"identity,omitempty"`
+}
+
+type DeleteRemoteIdentityResponse struct {
+	Identity *RemoteIdentity `json:"identity,omitempty"`
+}
+
 type Error struct {
 	Error string `json:"error,omitempty"`
 
 	Error_description string `json:"error_description,omitempty"`
+}
+
+type GetRemoteIdentityResponse struct {
+	Identity *RemoteIdentity `json:"identity,omitempty"`
+}
+
+type ListRemoteIdentityResponse struct {
+	Identities []*RemoteIdentity `json:"identities,omitempty"`
 }
 
 type RefreshClient struct {
@@ -95,6 +119,16 @@ type RefreshClient struct {
 
 type RefreshClientList struct {
 	Clients []*RefreshClient `json:"clients,omitempty"`
+}
+
+type RemoteIdentity struct {
+	ConnectorID string `json:"connectorID,omitempty"`
+
+	RemoteID string `json:"remoteID,omitempty"`
+}
+
+type RemoteIdentityDeleteResponse struct {
+	Ok bool `json:"ok,omitempty"`
 }
 
 type ResendEmailInvitationRequest struct {
@@ -326,6 +360,89 @@ func (c *RefreshClientRevokeCall) Do() error {
 
 }
 
+// method id "dex.User.AddRemoteIdentity":
+
+type UsersAddRemoteIdentityCall struct {
+	s                        *Service
+	id                       string
+	addremoteidentityrequest *AddRemoteIdentityRequest
+	opt_                     map[string]interface{}
+}
+
+// AddRemoteIdentity: Add a remote identity for a user.
+func (r *UsersService) AddRemoteIdentity(id string, addremoteidentityrequest *AddRemoteIdentityRequest) *UsersAddRemoteIdentityCall {
+	c := &UsersAddRemoteIdentityCall{s: r.s, opt_: make(map[string]interface{})}
+	c.id = id
+	c.addremoteidentityrequest = addremoteidentityrequest
+	return c
+}
+
+// Fields allows partial responses to be retrieved.
+// See https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *UsersAddRemoteIdentityCall) Fields(s ...googleapi.Field) *UsersAddRemoteIdentityCall {
+	c.opt_["fields"] = googleapi.CombineFields(s)
+	return c
+}
+
+func (c *UsersAddRemoteIdentityCall) Do() (*AddRemoteIdentityResponse, error) {
+	var body io.Reader = nil
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.addremoteidentityrequest)
+	if err != nil {
+		return nil, err
+	}
+	ctype := "application/json"
+	params := make(url.Values)
+	params.Set("alt", "json")
+	if v, ok := c.opt_["fields"]; ok {
+		params.Set("fields", fmt.Sprintf("%v", v))
+	}
+	urls := googleapi.ResolveRelative(c.s.BasePath, "users/{id}/remote-identity")
+	urls += "?" + params.Encode()
+	req, _ := http.NewRequest("POST", urls, body)
+	googleapi.Expand(req.URL, map[string]string{
+		"id": c.id,
+	})
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", "google-api-go-client/0.5")
+	res, err := c.s.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	var ret *AddRemoteIdentityResponse
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Add a remote identity for a user.",
+	//   "httpMethod": "POST",
+	//   "id": "dex.User.AddRemoteIdentity",
+	//   "parameterOrder": [
+	//     "id"
+	//   ],
+	//   "parameters": {
+	//     "id": {
+	//       "location": "path",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "users/{id}/remote-identity",
+	//   "request": {
+	//     "$ref": "AddRemoteIdentityRequest"
+	//   },
+	//   "response": {
+	//     "$ref": "AddRemoteIdentityResponse"
+	//   }
+	// }
+
+}
+
 // method id "dex.User.Create":
 
 type UsersCreateCall struct {
@@ -390,6 +507,90 @@ func (c *UsersCreateCall) Do() (*UserCreateResponse, error) {
 	//   },
 	//   "response": {
 	//     "$ref": "UserCreateResponse"
+	//   }
+	// }
+
+}
+
+// method id "dex.User.DeleteRemoteIdentity":
+
+type UsersDeleteRemoteIdentityCall struct {
+	s                           *Service
+	id                          string
+	deleteremoteidentityrequest *DeleteRemoteIdentityRequest
+	opt_                        map[string]interface{}
+}
+
+// DeleteRemoteIdentity: Delete a single RemoteIdentity object by user
+// and supplied remote identity object.
+func (r *UsersService) DeleteRemoteIdentity(id string, deleteremoteidentityrequest *DeleteRemoteIdentityRequest) *UsersDeleteRemoteIdentityCall {
+	c := &UsersDeleteRemoteIdentityCall{s: r.s, opt_: make(map[string]interface{})}
+	c.id = id
+	c.deleteremoteidentityrequest = deleteremoteidentityrequest
+	return c
+}
+
+// Fields allows partial responses to be retrieved.
+// See https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *UsersDeleteRemoteIdentityCall) Fields(s ...googleapi.Field) *UsersDeleteRemoteIdentityCall {
+	c.opt_["fields"] = googleapi.CombineFields(s)
+	return c
+}
+
+func (c *UsersDeleteRemoteIdentityCall) Do() (*DeleteRemoteIdentityResponse, error) {
+	var body io.Reader = nil
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.deleteremoteidentityrequest)
+	if err != nil {
+		return nil, err
+	}
+	ctype := "application/json"
+	params := make(url.Values)
+	params.Set("alt", "json")
+	if v, ok := c.opt_["fields"]; ok {
+		params.Set("fields", fmt.Sprintf("%v", v))
+	}
+	urls := googleapi.ResolveRelative(c.s.BasePath, "users/{id}/remote-identity")
+	urls += "?" + params.Encode()
+	req, _ := http.NewRequest("DELETE", urls, body)
+	googleapi.Expand(req.URL, map[string]string{
+		"id": c.id,
+	})
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", "google-api-go-client/0.5")
+	res, err := c.s.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	var ret *DeleteRemoteIdentityResponse
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Delete a single RemoteIdentity object by user and supplied remote identity object.",
+	//   "httpMethod": "DELETE",
+	//   "id": "dex.User.DeleteRemoteIdentity",
+	//   "parameterOrder": [
+	//     "id"
+	//   ],
+	//   "parameters": {
+	//     "id": {
+	//       "location": "path",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "users/{id}/remote-identity",
+	//   "request": {
+	//     "$ref": "DeleteRemoteIdentityRequest"
+	//   },
+	//   "response": {
+	//     "$ref": "DeleteRemoteIdentityResponse"
 	//   }
 	// }
 
@@ -550,6 +751,88 @@ func (c *UsersGetCall) Do() (*UserResponse, error) {
 
 }
 
+// method id "dex.User.GetRemoteIdentity":
+
+type UsersGetRemoteIdentityCall struct {
+	s           *Service
+	id          string
+	connectorid string
+	opt_        map[string]interface{}
+}
+
+// GetRemoteIdentity: Get a single RemoteIdentity object by user and
+// remote ids.
+func (r *UsersService) GetRemoteIdentity(id string, connectorid string) *UsersGetRemoteIdentityCall {
+	c := &UsersGetRemoteIdentityCall{s: r.s, opt_: make(map[string]interface{})}
+	c.id = id
+	c.connectorid = connectorid
+	return c
+}
+
+// Fields allows partial responses to be retrieved.
+// See https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *UsersGetRemoteIdentityCall) Fields(s ...googleapi.Field) *UsersGetRemoteIdentityCall {
+	c.opt_["fields"] = googleapi.CombineFields(s)
+	return c
+}
+
+func (c *UsersGetRemoteIdentityCall) Do() (*GetRemoteIdentityResponse, error) {
+	var body io.Reader = nil
+	params := make(url.Values)
+	params.Set("alt", "json")
+	if v, ok := c.opt_["fields"]; ok {
+		params.Set("fields", fmt.Sprintf("%v", v))
+	}
+	urls := googleapi.ResolveRelative(c.s.BasePath, "users/{id}/remote-identity/{connectorid}")
+	urls += "?" + params.Encode()
+	req, _ := http.NewRequest("GET", urls, body)
+	googleapi.Expand(req.URL, map[string]string{
+		"id":          c.id,
+		"connectorid": c.connectorid,
+	})
+	req.Header.Set("User-Agent", "google-api-go-client/0.5")
+	res, err := c.s.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	var ret *GetRemoteIdentityResponse
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Get a single RemoteIdentity object by user and remote ids.",
+	//   "httpMethod": "GET",
+	//   "id": "dex.User.GetRemoteIdentity",
+	//   "parameterOrder": [
+	//     "id",
+	//     "connectorid"
+	//   ],
+	//   "parameters": {
+	//     "connectorid": {
+	//       "location": "path",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "id": {
+	//       "location": "path",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "users/{id}/remote-identity/{connectorid}",
+	//   "response": {
+	//     "$ref": "GetRemoteIdentityResponse"
+	//   }
+	// }
+
+}
+
 // method id "dex.User.List":
 
 type UsersListCall struct {
@@ -631,6 +914,78 @@ func (c *UsersListCall) Do() (*UsersResponse, error) {
 	//   "path": "users",
 	//   "response": {
 	//     "$ref": "UsersResponse"
+	//   }
+	// }
+
+}
+
+// method id "dex.User.ListRemoteIdentity":
+
+type UsersListRemoteIdentityCall struct {
+	s    *Service
+	id   string
+	opt_ map[string]interface{}
+}
+
+// ListRemoteIdentity: Retrieve a page of RemoteIdentity objects.
+func (r *UsersService) ListRemoteIdentity(id string) *UsersListRemoteIdentityCall {
+	c := &UsersListRemoteIdentityCall{s: r.s, opt_: make(map[string]interface{})}
+	c.id = id
+	return c
+}
+
+// Fields allows partial responses to be retrieved.
+// See https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *UsersListRemoteIdentityCall) Fields(s ...googleapi.Field) *UsersListRemoteIdentityCall {
+	c.opt_["fields"] = googleapi.CombineFields(s)
+	return c
+}
+
+func (c *UsersListRemoteIdentityCall) Do() (*ListRemoteIdentityResponse, error) {
+	var body io.Reader = nil
+	params := make(url.Values)
+	params.Set("alt", "json")
+	if v, ok := c.opt_["fields"]; ok {
+		params.Set("fields", fmt.Sprintf("%v", v))
+	}
+	urls := googleapi.ResolveRelative(c.s.BasePath, "users/{id}/remote-identity")
+	urls += "?" + params.Encode()
+	req, _ := http.NewRequest("GET", urls, body)
+	googleapi.Expand(req.URL, map[string]string{
+		"id": c.id,
+	})
+	req.Header.Set("User-Agent", "google-api-go-client/0.5")
+	res, err := c.s.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	var ret *ListRemoteIdentityResponse
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Retrieve a page of RemoteIdentity objects.",
+	//   "httpMethod": "GET",
+	//   "id": "dex.User.ListRemoteIdentity",
+	//   "parameterOrder": [
+	//     "id"
+	//   ],
+	//   "parameters": {
+	//     "id": {
+	//       "location": "path",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "users/{id}/remote-identity",
+	//   "response": {
+	//     "$ref": "ListRemoteIdentityResponse"
 	//   }
 	// }
 

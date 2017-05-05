@@ -30,6 +30,8 @@ var (
 	UsersDisableEndpoint          = addBasePath(UsersSubTree + "/:id/disable")
 	UsersResendInvitationEndpoint = addBasePath(UsersSubTree + "/:id/resend-invitation")
 	UsersMetadataEndpoint         = addBasePath(UsersSubTree + "/:id/metadata")
+	RemoteIdentitySubTree         = addBasePath(UsersSubTree + "/:id/remote-identity")
+	RemoteIdentityEndpoint        = addBasePath(UsersSubTree + "/:id/remote-identity/:connectorid")
 	AccountSubTree                = "/account"
 	AccountListRefreshTokens      = addBasePath(AccountSubTree + "/:userid/refresh")
 	AccountRevokeRefreshToken     = addBasePath(AccountSubTree + "/:userid/refresh/:clientid")
@@ -68,6 +70,11 @@ func (s *UserMgmtServer) HTTPHandler() http.Handler {
 	r.GET(UsersMetadataEndpoint, s.authAdminUser(s.getUserMetadata))
 	r.GET(AccountListRefreshTokens, s.authAccount(s.listClientsWithRefreshTokens))
 	r.DELETE(AccountRevokeRefreshToken, s.authAccount(s.revokeRefreshTokensForClient))
+
+	r.GET(RemoteIdentitySubTree, s.authAdminUser(s.listRemoteIdentity))
+	r.POST(RemoteIdentitySubTree, s.authAdminUser(s.addRemoteIdentity))
+	r.GET(RemoteIdentityEndpoint, s.authAdminUser(s.getRemoteIdentity))
+	r.DELETE(RemoteIdentitySubTree, s.authAdminUser(s.deleteRemoteIdentity))
 	return r
 }
 
@@ -292,6 +299,103 @@ func (s *UserMgmtServer) revokeRefreshTokensForClient(w http.ResponseWriter, r *
 		return
 	}
 	w.WriteHeader(http.StatusOK) // NOTE (ericchiang): http.StatusNoContent or return an empty JSON object?
+}
+
+func (s *UserMgmtServer) listRemoteIdentity(w http.ResponseWriter, r *http.Request, ps httprouter.Params, creds api.Creds) {
+	log.Debug("UserMgmtServer.listRemoteIdentity")
+	id := ps.ByName("id")
+	if id == "" {
+		writeAPIError(w, http.StatusBadRequest,
+			newAPIError(errorInvalidRequest, "id is required"))
+		return
+	}
+
+	identities, err := s.api.ListRemoteIdentity(creds, id)
+	if err != nil {
+		s.writeError(w, err)
+		return
+	}
+
+	response := schema.ListRemoteIdentityResponse{
+		Identities: identities,
+	}
+	writeResponseWithBody(w, http.StatusOK, response)
+}
+
+func (s *UserMgmtServer) getRemoteIdentity(w http.ResponseWriter, r *http.Request, ps httprouter.Params, creds api.Creds) {
+	log.Debug("UserMgmtServer.getRemoteIdentity")
+	id := ps.ByName("id")
+	if id == "" {
+		writeAPIError(w, http.StatusBadRequest,
+			newAPIError(errorInvalidRequest, "id is required"))
+		return
+	}
+
+	connectorid := ps.ByName("connectorid")
+	if connectorid == "" {
+		writeAPIError(w, http.StatusBadRequest,
+			newAPIError(errorInvalidRequest, "connectorid is required"))
+		return
+	}
+
+	response, err := s.api.GetRemoteIdentity(creds, id, connectorid)
+	if err != nil {
+		s.writeError(w, err)
+		return
+	}
+
+	writeResponseWithBody(w, http.StatusOK, response)
+}
+
+func (s *UserMgmtServer) addRemoteIdentity(w http.ResponseWriter, r *http.Request, ps httprouter.Params, creds api.Creds) {
+	log.Debug("UserMgmtServer.addRemoteIdentity")
+
+	id := ps.ByName("id")
+	if id == "" {
+		writeAPIError(w, http.StatusBadRequest,
+			newAPIError(errorInvalidRequest, "id is required"))
+		return
+	}
+
+	createReq := &schema.AddRemoteIdentityRequest{}
+
+	if err := json.NewDecoder(r.Body).Decode(createReq); err != nil {
+		writeInvalidRequest(w, "cannot parse JSON body")
+		return
+	}
+
+	createdResponse, err := s.api.AddRemoteIdentity(creds, id, createReq)
+	if err != nil {
+		s.writeError(w, err)
+		return
+	}
+
+	writeResponseWithBody(w, http.StatusOK, createdResponse)
+}
+
+func (s *UserMgmtServer) deleteRemoteIdentity(w http.ResponseWriter, r *http.Request, ps httprouter.Params, creds api.Creds) {
+	log.Debug("UserMgmtServer.deleteRemoteIdentity")
+	id := ps.ByName("id")
+	if id == "" {
+		writeAPIError(w, http.StatusBadRequest,
+			newAPIError(errorInvalidRequest, "id is required"))
+		return
+	}
+
+	req := &schema.DeleteRemoteIdentityRequest{}
+
+	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+		writeInvalidRequest(w, "cannot parse JSON body")
+		return
+	}
+
+	response, err := s.api.DeleteRemoteIdentity(creds, id, req)
+	if err != nil {
+		s.writeError(w, err)
+		return
+	}
+
+	writeResponseWithBody(w, http.StatusOK, response)
 }
 
 func (s *UserMgmtServer) writeError(w http.ResponseWriter, err error) {

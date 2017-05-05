@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/coreos/dex/client"
@@ -374,6 +375,88 @@ func (u *UsersAPI) Authorize(creds Creds) bool {
 	return creds.User.Admin && !creds.User.Disabled
 }
 
+// TODO: Convert to schema.ListRemoteIdentityResponse
+func (u *UsersAPI) ListRemoteIdentity(creds Creds, userID string) (
+	[]*schema.RemoteIdentity,
+	error) {
+	log.Infof("userAPI: ListRemoteIdentity")
+
+	if !u.Authorize(creds) {
+		return nil, ErrorUnauthorized
+	}
+
+	identities, err := u.userManager.ListRemoteIdentity(userID)
+	if err != nil {
+		return nil, mapError(err)
+	}
+
+	list := []*schema.RemoteIdentity{}
+	for _, identity := range identities {
+		schemaRemoteIdentity := remoteIdentityObjectToSchema(identity)
+		list = append(list, &schemaRemoteIdentity)
+	}
+
+	return list, nil
+}
+
+func (u *UsersAPI) GetRemoteIdentity(creds Creds, userID, connectorID string) (
+	schema.GetRemoteIdentityResponse, error) {
+	log.Infof("userAPI: GetRemoteIdentity")
+
+	if !u.Authorize(creds) {
+		return schema.GetRemoteIdentityResponse{}, ErrorUnauthorized
+	}
+
+	identities, err := u.userManager.ListRemoteIdentity(userID)
+	if err != nil {
+		return schema.GetRemoteIdentityResponse{}, mapError(err)
+	}
+
+	for _, identity := range identities {
+		schemaRemoteIdentity := remoteIdentityObjectToSchema(identity)
+		if strings.Compare(schemaRemoteIdentity.ConnectorID, connectorID) == 0 {
+			return schema.GetRemoteIdentityResponse{Identity: &schemaRemoteIdentity}, nil
+		}
+	}
+
+	return schema.GetRemoteIdentityResponse{}, errors.New("Could match remote identity to supplied user and remote id")
+}
+
+func (u *UsersAPI) AddRemoteIdentity(creds Creds, userid string, request *schema.AddRemoteIdentityRequest) (schema.AddRemoteIdentityResponse, error) {
+	log.Infof("userAPI: AddRemoteIdentity")
+	if !u.Authorize(creds) {
+		return schema.AddRemoteIdentityResponse{}, ErrorUnauthorized
+	}
+
+	err := u.userManager.AddRemoteIdentity(nil, userid, remoteIdentitySchemaToObject(request.Identity))
+
+	if err != nil {
+		return schema.AddRemoteIdentityResponse{}, mapError(err)
+	}
+
+	return schema.AddRemoteIdentityResponse{
+		Identity: request.Identity,
+	}, nil
+}
+
+func (u *UsersAPI) DeleteRemoteIdentity(creds Creds, userID string, rid *schema.DeleteRemoteIdentityRequest) (schema.DeleteRemoteIdentityResponse, error) {
+	log.Infof("userAPI: DeleteRemoteIdentity")
+
+	if !u.Authorize(creds) {
+		return schema.DeleteRemoteIdentityResponse{}, ErrorUnauthorized
+	}
+
+	ridObject := remoteIdentitySchemaToObject(rid.Identity)
+
+	err := u.userManager.DeleteRemoteIdentity(nil, userID, ridObject)
+
+	if err != nil {
+		return schema.DeleteRemoteIdentityResponse{}, mapError(err)
+	}
+
+	return schema.DeleteRemoteIdentityResponse{Identity: rid.Identity}, nil
+}
+
 func userToSchemaUser(usr user.User) schema.User {
 	return schema.User{
 		Id:            usr.ID,
@@ -416,4 +499,18 @@ func generateTempHash() (string, error) {
 		return "", errors.New("unable to read enough random bytes")
 	}
 	return base64.URLEncoding.EncodeToString(b), nil
+}
+
+func remoteIdentityObjectToSchema(in user.RemoteIdentity) schema.RemoteIdentity {
+	return schema.RemoteIdentity{
+		ConnectorID: in.ConnectorID,
+		RemoteID:    in.ID,
+	}
+}
+
+func remoteIdentitySchemaToObject(in *schema.RemoteIdentity) user.RemoteIdentity {
+	return user.RemoteIdentity{
+		ConnectorID: in.ConnectorID,
+		ID:          in.RemoteID,
+	}
 }

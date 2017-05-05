@@ -81,7 +81,7 @@ func (m *UserManager) CreateUser(usr user.User, hashedPassword user.Password, co
 		ConnectorID: connID,
 		ID:          usr.ID,
 	}
-	if err := m.addRemoteIdentity(tx, usr.ID, rid); err != nil {
+	if err := m.AddRemoteIdentity(tx, usr.ID, rid); err != nil {
 		rollback(tx)
 		return "", err
 	}
@@ -201,7 +201,7 @@ func (m *UserManager) RegisterWithRemoteIdentity(email string, emailVerified boo
 		return "", err
 	}
 
-	if err := m.addRemoteIdentity(tx, usr.ID, rid); err != nil {
+	if err := m.AddRemoteIdentity(tx, usr.ID, rid); err != nil {
 		rollback(tx)
 		return "", err
 	}
@@ -237,7 +237,7 @@ func (m *UserManager) RegisterWithPassword(email, plaintext, connID string) (str
 		ConnectorID: connID,
 		ID:          usr.ID,
 	}
-	if err := m.addRemoteIdentity(tx, usr.ID, rid); err != nil {
+	if err := m.AddRemoteIdentity(tx, usr.ID, rid); err != nil {
 		rollback(tx)
 		return "", err
 	}
@@ -398,7 +398,7 @@ func (m *UserManager) insertNewUser(tx repo.Transaction, email string, emailVeri
 	return usr, nil
 }
 
-func (m *UserManager) addRemoteIdentity(tx repo.Transaction, userID string, rid user.RemoteIdentity) error {
+func (m *UserManager) AddRemoteIdentity(tx repo.Transaction, userID string, rid user.RemoteIdentity) error {
 	if _, err := m.connCfgRepo.GetConnectorByID(tx, rid.ConnectorID); err != nil {
 		return err
 	}
@@ -406,6 +406,21 @@ func (m *UserManager) addRemoteIdentity(tx repo.Transaction, userID string, rid 
 		return err
 	}
 	return nil
+}
+
+func (m *UserManager) DeleteRemoteIdentity(tx repo.Transaction, userID string, rid user.RemoteIdentity) error {
+	if _, err := m.connCfgRepo.GetConnectorByID(tx, rid.ConnectorID); err != nil {
+		return err
+	}
+
+	if err := m.userRepo.RemoveRemoteIdentity(tx, userID, rid); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *UserManager) ListRemoteIdentity(userID string) ([]user.RemoteIdentity, error) {
+	return m.userRepo.GetRemoteIdentities(nil, userID)
 }
 
 func rollback(tx repo.Transaction) {

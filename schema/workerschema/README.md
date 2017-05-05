@@ -8,6 +8,46 @@ __Version:__ v1
 ## Models
 
 
+### AddRemoteIdentityRequest
+
+
+
+```
+{
+    identity: RemoteIdentity
+}
+```
+
+### AddRemoteIdentityResponse
+
+
+
+```
+{
+    identity: RemoteIdentity
+}
+```
+
+### DeleteRemoteIdentityRequest
+
+
+
+```
+{
+    identity: RemoteIdentity
+}
+```
+
+### DeleteRemoteIdentityResponse
+
+
+
+```
+{
+    identity: RemoteIdentity
+}
+```
+
 ### Error
 
 
@@ -16,6 +56,28 @@ __Version:__ v1
 {
     error: string,
     error_description: string
+}
+```
+
+### GetRemoteIdentityResponse
+
+
+
+```
+{
+    identity: RemoteIdentity
+}
+```
+
+### ListRemoteIdentityResponse
+
+
+
+```
+{
+    identities: [
+        RemoteIdentity
+    ]
 }
 ```
 
@@ -41,6 +103,27 @@ A client with associated public metadata.
     clients: [
         RefreshClient
     ]
+}
+```
+
+### RemoteIdentity
+
+
+
+```
+{
+    connectorID: string,
+    remoteID: string
+}
+```
+
+### RemoteIdentityDeleteResponse
+
+
+
+```
+{
+    ok: boolean
 }
 ```
 
@@ -259,8 +342,8 @@ A client with associated public metadata.
 
 > |Name|Located in|Description|Required|Type|
 |:-----|:-----|:-----|:-----|:-----|
-| maxResults | query |  | No | integer | 
 | nextPageToken | query |  | No | string | 
+| maxResults | query |  | No | integer | 
 
 
 > __Responses__
@@ -347,6 +430,113 @@ A client with associated public metadata.
 > |Code|Description|Type|
 |:-----|:-----|:-----|
 | 200 |  | [UserDisableResponse](#userdisableresponse) |
+| default | Unexpected error |  |
+
+
+### DELETE /users/{id}/remote-identity
+
+> __Summary__
+
+> DeleteRemoteIdentity Users
+
+> __Description__
+
+> Delete a single RemoteIdentity object by user and supplied remote identity object.
+
+
+> __Parameters__
+
+> |Name|Located in|Description|Required|Type|
+|:-----|:-----|:-----|:-----|:-----|
+| id | path |  | Yes | string | 
+|  | body |  | Yes | [DeleteRemoteIdentityRequest](#deleteremoteidentityrequest) | 
+
+
+> __Responses__
+
+> |Code|Description|Type|
+|:-----|:-----|:-----|
+| 200 |  | [DeleteRemoteIdentityResponse](#deleteremoteidentityresponse) |
+| default | Unexpected error |  |
+
+
+### GET /users/{id}/remote-identity
+
+> __Summary__
+
+> ListRemoteIdentity Users
+
+> __Description__
+
+> Retrieve a page of RemoteIdentity objects.
+
+
+> __Parameters__
+
+> |Name|Located in|Description|Required|Type|
+|:-----|:-----|:-----|:-----|:-----|
+| id | path |  | Yes | string | 
+
+
+> __Responses__
+
+> |Code|Description|Type|
+|:-----|:-----|:-----|
+| 200 |  | [ListRemoteIdentityResponse](#listremoteidentityresponse) |
+| default | Unexpected error |  |
+
+
+### POST /users/{id}/remote-identity
+
+> __Summary__
+
+> AddRemoteIdentity Users
+
+> __Description__
+
+> Add a remote identity for a user.
+
+
+> __Parameters__
+
+> |Name|Located in|Description|Required|Type|
+|:-----|:-----|:-----|:-----|:-----|
+| id | path |  | Yes | string | 
+|  | body |  | Yes | [AddRemoteIdentityRequest](#addremoteidentityrequest) | 
+
+
+> __Responses__
+
+> |Code|Description|Type|
+|:-----|:-----|:-----|
+| 200 |  | [AddRemoteIdentityResponse](#addremoteidentityresponse) |
+| default | Unexpected error |  |
+
+
+### GET /users/{id}/remote-identity/{connectorid}
+
+> __Summary__
+
+> GetRemoteIdentity Users
+
+> __Description__
+
+> Get a single RemoteIdentity object by user and remote ids.
+
+
+> __Parameters__
+
+> |Name|Located in|Description|Required|Type|
+|:-----|:-----|:-----|:-----|:-----|
+| id | path |  | Yes | string | 
+| connectorid | path |  | Yes | string | 
+
+
+> __Responses__
+
+> |Code|Description|Type|
+|:-----|:-----|:-----|
+| 200 |  | [GetRemoteIdentityResponse](#getremoteidentityresponse) |
 | default | Unexpected error |  |
 
 
