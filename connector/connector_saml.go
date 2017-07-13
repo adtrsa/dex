@@ -126,7 +126,11 @@ func (c *SAMLConnector) handleLogin(lf oidc.LoginFunc,
 		var scopes v2saml.Scopes
 
 		// build authentication request POST data.
-		action, value, err := c.v2connector.POSTData(scopes, sessionKey)
+
+		// Strip padding char from session key and prefix with _,
+		// otherwise base64-encoded session key leads to invalid xs:ID:
+		// http://www.datypic.com/sc/xsd/t-xsd_ID.html
+		action, value, err := c.v2connector.POSTData(scopes, "_"+sessionKey[0:len(sessionKey)-1])
 
 		if err != nil {
 			log.WithFields(log.Fields{
@@ -135,7 +139,6 @@ func (c *SAMLConnector) handleLogin(lf oidc.LoginFunc,
 			return
 		}
 
-		// TODO: (adtrsa) May need to add other things to RelayState apart from session key to auth
 		// TODO(ericchiang): Don't inline this.
 		fmt.Fprintf(w, `<!DOCTYPE html>
 			  <html lang="en">
