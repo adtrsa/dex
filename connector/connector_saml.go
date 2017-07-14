@@ -197,13 +197,9 @@ func (c *SAMLConnector) handleLogin(lf oidc.LoginFunc,
 			return
 		}
 
-		log.WithFields(log.Fields{"samplResponse": samlResponse}).Debug("SAML response")
-
 		var s v2saml.Scopes
-		ident2, err := c.v2connector.HandlePOST(s, samlResponse,
-			sessionKey)
-
-		log.Debugf("ident2: %+v", ident2)
+		//(adtrsa) InResponseTo of response will contain modified session key
+		ident2, err := c.v2connector.HandlePOST(s, samlResponse, "_"+sessionKey[0:len(sessionKey)-1])
 
 		if err != nil {
 			log.WithFields(log.Fields{"err": err}).Error("SAMLConnector.handlePOST Unable to handle response.")
@@ -224,8 +220,6 @@ func (c *SAMLConnector) handleLogin(lf oidc.LoginFunc,
 				}).Error("SAMLConnector.handlePOST Identity retrieval failure.")
 			return
 		}
-
-		log.Debugf("ident: %+v", ident)
 
 		redirectURL, err := lf(*ident, sessionKey)
 

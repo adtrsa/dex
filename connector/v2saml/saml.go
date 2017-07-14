@@ -303,8 +303,7 @@ func (p *provider) HandlePOST(s Scopes, samlResponse, inResponseTo string) (iden
 	// TODO: replace with Assertion.Coditions[0].AudienceRestriction.Audience == p.Issuer???
 	log.Warn("TODO:(adtrsa) Issuer check disabled.")
 
-	// Verify InResponseTo value matches the expected ID associated with
-	// the RelayState.
+	// Verify InResponseTo value matches supplied value (session key).
 	if resp.InResponseTo != inResponseTo {
 		return ident, fmt.Errorf("expected InResponseTo value %s, got %s", inResponseTo, resp.InResponseTo)
 	}
