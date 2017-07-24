@@ -493,14 +493,14 @@ func (p *provider) validateConditions(assertion *assertion) error {
 			values := make([]string, len(audiences))
 			issuerInAudiences := false
 			for i, audience := range audiences {
-				if audience.Value == p.redirectURI {
+				if audience.Value == p.issuer {
 					issuerInAudiences = true
 					break
 				}
 				values[i] = audience.Value
 			}
 			if !issuerInAudiences {
-				return fmt.Errorf("required audience %s was not in Response audiences %s", p.redirectURI, values)
+				return fmt.Errorf("required audience %s was not in Response audiences %s", p.issuer, values)
 			}
 		}
 	}
